@@ -1,0 +1,15 @@
+NAME|DummyBMSQ_PreProd
+DATE|06:21:23
+TIME|10:22:53
+DATA|distance_X.DX|   DX|42.23609| 
+DATA|distance_Y.DY|   DY|41.13349| 
+DATA|Z_Optical_1.Z|    Z|-11.94188| 
+DATA|Z_Optical_2.Z|    Z|-11.95362| 
+DATA|Z_Optical_3.Z|    Z|-11.92027| 
+DATA|Z_Optical_4.Z|    Z|-11.92611| 
+DATA|Z_Optical_5.Z|    Z|-11.95475| 
+DATA|Z_Optical_6.Z|    Z|-11.95332| 
+DATA|Z_Optical_7.Z|    Z|-11.95069| 
+DATA|Z_Optical_8.Z|    Z|-11.95219| 
+DATA|Z_Optical_9.Z|    Z|-11.94848| 
+DATA|Z_Optical_10.Z|    Z|-11.94869| 
