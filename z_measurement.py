@@ -10,7 +10,7 @@ import os
 def main():
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument("-i", "--inputFile", type=str, help = "input txt file")
+    parser.add_argument("-i", "--inputFile", type=str, help = "input txt file",default=None)
     #parser.add_argument("-j", "--inputFileJig", type=str, help = "input jig txt file", default = "Jig_SQ.txt" )
     parser.add_argument("-m", "--measurement", type=str, help = "measurement type, right now the measurement can be flex, dummyBM or assembly")
 
@@ -20,24 +20,35 @@ def main():
     # infile = args.inputFile
 
     measurement = args.measurement
+    infile = args.inputFile
 
 
 
     if measurement=="flex":
-        infile = max(glob.iglob("flex_SQ_*"), key=os.path.getctime)
+        if not infile:
+            infile = max(glob.iglob("flex_SQ_*"), key=os.path.getctime)
         infile = addSerialQuery(infile)
         infile_jig = "Jig_SQ.txt"
         flexMeasurement(infile,infile_jig)
     elif measurement=="dummyBM":
-        infile = max(glob.iglob("dummyBM_SQ*"), key=os.path.getctime)
+        if not infile:
+            infile = max(glob.iglob("dummyBM_SQ*"), key=os.path.getctime)
         infile = addSerialQuery(infile)
         infile_jig = "dummyBMJig_SQ.txt"
         dummyMeasurement(infile,infile_jig)
     elif measurement =="assembly":
-        infile = max(glob.iglob("AssembledModule_SQ*"), key=os.path.getctime)
+        if not infile:
+            infile = max(glob.iglob("AssembledModule_SQ*"), key=os.path.getctime)
         infile = addSerialQuery(infile)
         infile_jig = "AssembledModuleJig_SQ.txt"
         assemblyMeasurement(infile,infile_jig)
+    elif measurement == "realBM":
+        if not infile:
+            infile = max(glob.iglob("realBM_SQ_*"), key=os.path.getctime)
+        infile = addSerialQuery(infile)
+        infile_jig = "realBMJig_SQ.txt"
+        assemblyrealMeasurement(infile, infile_jig)
+
 
 
 
@@ -282,6 +293,57 @@ def assemblyMeasurement(infile,infile_jig):
     HV_z = np.subtract(jig_HV, HV)
     print ("Avg HV height: ", abs(np.mean(HV_z)) )
 
+def assemblyrealMeasurement(infile, infile_jig):
+    DX_FE = 0
+    DY_FE = 0
+    DX_Sensor = 0
+    DY_Sensor = 0
+    FE_left = []
+    FE_right = []
+    bm = []
+    FE_left_jig = []
+    FE_right_jig = []
+    bm_jig = []
+    with open(infile) as file:
+        for line in file:
+            if "distance_FE_X.DX" in line:
+                DX_FE = float(line.split()[1].replace('DX|','').replace('|',''))
+            if "distance_FE_Y.DY" in line:
+                DY_FE = float(line.split()[1].replace('DY|','').replace('|',''))
+            if "distance_Sensor_X.DX" in line:
+                DX_Sensor = float(line.split()[1].replace('DX|','').replace('|',''))
+            if "distance_Sensor_Y.DY" in line:
+                DY_Sensor = float(line.split()[1].replace('DY|','').replace('|',''))
+            if "FE_left" in line:
+                FE_left.append(float(line.split()[1].replace('Z|','').replace('|','')))
+            if "FE_right" in line:
+                FE_right.append(float(line.split()[1].replace('Z|','').replace('|','')))
+            if "bm" in line:
+                bm.append(float(line.split()[1].replace('Z|','').replace('|','')))
+
+    with open(infile_jig) as file:
+        for line in file:
+            if "FE_left" in line:
+                FE_left_jig.append(float(line.split()[1].replace('Z|','').replace('|','')))
+            if "FE_right" in line:
+                FE_right_jig.append(float(line.split()[1].replace('Z|','').replace('|','')))
+            if "bm" in line:
+                bm_jig.append(float(line.split()[1].replace('Z|','').replace('|','')))
+  
+    FE_left_z = (np.subtract(FE_left, FE_left_jig))
+    FE_right_z = (np.subtract(FE_right, FE_right_jig))
+    bm_z = (np.subtract(bm, bm_jig))
+   
+    print ("BM thickness average: ", mean(bm_z))  
+    print ("BM thickness std dev: ", np.std(bm_z))
+    print("FE Left thickness average: ", mean(FE_left_z))
+    print("FE Left std dev: ", np.std(FE_left_z)) 
+    print("FE Right thickness average: ", mean(FE_right_z))
+    print("FE Right std dev: ", np.std(FE_right_z))
+    print("FE Y Distance: ", DY_FE) 
+    print("FE X Distance: ", DX_FE)
+    print("Sensor Y Distance: ", DY_Sensor)
+    print("Sensor X Distance: ", DX_Sensor)
 
 
 # receives string infile and string serialNum
